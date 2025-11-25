@@ -43,7 +43,7 @@ public class ViewAddRemoveRoles {
 	private static double height = applicationMain.FoundationsMain.WINDOW_HEIGHT;
 
 	// ✅ Add this array to define available roles (now includes Student)
-	protected static String[] roles = {"Admin", "Role1", "Role2", "Student"};
+	protected static String[] roles = {"Admin", "Role1", "Role2", "Student", "Staff"};
 
 	
 	// These are the widget attributes for the GUI. There are 3 areas for this GUI.

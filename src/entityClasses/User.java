@@ -10,6 +10,7 @@ package entityClasses;
  * 
  * @author Lynn Robert Carter
  * 
+ * @version 2.00 2025-11-24 Added Staff role for TP3
  * 
  */ 
 
@@ -29,6 +30,7 @@ public class User {
     private boolean role1;
     private boolean role2;
     private boolean Student;
+    private boolean staffRole;  // ⭐ NEW: Added for TP3 grading functionality
     
     
     /*****
@@ -53,14 +55,18 @@ public class User {
      * 
      * @param r1 specifies the the Admin attribute (TRUE or FALSE) for this user
      * 
-     * @param r2 specifies the the Student attribute (TRUE or FALSE) for this user
+     * @param r2 specifies the the Role1 attribute (TRUE or FALSE) for this user
      * 
-     * @param r3 specifies the the Reviewer attribute (TRUE or FALSE) for this user
+     * @param r3 specifies the the Role2 attribute (TRUE or FALSE) for this user
+     * 
+     * @param r4 specifies the the Student attribute (TRUE or FALSE) for this user
+     * 
+     * @param r5 specifies the the Staff attribute (TRUE or FALSE) for this user
      * 
      */
     // Constructor to initialize a new User object with userName, password, and role.
     public User(String userName, String password, String fn, String mn, String ln, String pfn, 
-    		String ea, boolean r1, boolean r2, boolean r3, boolean r4) {
+    		String ea, boolean r1, boolean r2, boolean r3, boolean r4, boolean r5) {
         this.userName = userName;
         this.password = password;
         this.firstName = fn;
@@ -71,7 +77,14 @@ public class User {
         this.adminRole = r1;
         this.role1 = r2;
         this.role2 = r3;
-        this.Student= r4;
+        this.Student = r4;
+        this.staffRole = r5;  // ⭐ NEW: Initialize staff role
+    }
+    
+    // ⭐ NEW: Overloaded constructor for backward compatibility (4 roles)
+    public User(String userName, String password, String fn, String mn, String ln, String pfn, 
+    		String ea, boolean r1, boolean r2, boolean r3, boolean r4) {
+        this(userName, password, fn, mn, ln, pfn, ea, r1, r2, r3, r4, false);
     }
 
     
@@ -117,16 +130,29 @@ public class User {
     }
     
     /*****
-     * <p> Method: void setRole2User(boolean role) </p>
+     * <p> Method: void setStudentUser(boolean role) </p>
      * 
-     * <p> Description: This setter defines the role2 attribute. </p>
+     * <p> Description: This setter defines the Student attribute. </p>
      * 
-     * @param role is a boolean that specifies if this user in playing role2.
+     * @param role is a boolean that specifies if this user in playing Student role.
      * 
      */
-    // Sets the role2 user.
+    // Sets the Student user.
     public void setStudentUser(boolean role) {
     	this.Student=role;
+    }
+    
+    /*****
+     * <p> Method: void setStaffUser(boolean role) </p>
+     * 
+     * <p> Description: This setter defines the Staff attribute. </p>
+     * 
+     * @param role is a boolean that specifies if this user in playing Staff role.
+     * 
+     */
+    // ⭐ NEW: Sets the Staff user.
+    public void setStaffUser(boolean role) {
+    	this.staffRole=role;
     }
 
     
@@ -174,7 +200,7 @@ public class User {
      * @return a String of the MiddleName
 	 *
      */
-    // Gets the current value of the Student role attribute.
+    // Gets the current value of the MiddleName.
     public String getMiddleName() { return middleName; }
 
     
@@ -186,7 +212,7 @@ public class User {
      * @return a String of the LastName
 	 *
      */
-    // Gets the current value of the Student role attribute.
+    // Gets the current value of the LastName.
     public String getLastName() { return lastName; }
 
     
@@ -198,7 +224,7 @@ public class User {
      * @return a String of the PreferredFirstName
 	 *
      */
-    // Gets the current value of the Student role attribute.
+    // Gets the current value of the PreferredFirstName.
     public String getPreferredFirstName() { return preferredFirstName; }
 
     
@@ -210,7 +236,7 @@ public class User {
      * @return a String of the EmailAddress
 	 *
      */
-    // Gets the current value of the Student role attribute.
+    // Gets the current value of the EmailAddress.
     public String getEmailAddress() { return emailAddress; }
 
     public void setUserName(String s) { userName = s; }
@@ -258,15 +284,26 @@ public class User {
     public boolean getNewRole2() { return role2; }
     
     /*****
-     * <p> Method: String getRole2() </p>
+     * <p> Method: String getStudent() </p>
      * 
-     * <p> Description: This getter returns the value of the role2 attribute. </p>
+     * <p> Description: This getter returns the value of the Student attribute. </p>
      * 
      * @return a String of "TRUE" or "FALSE" based on state of the attribute
 	 *
      */
-    // Gets the current value of the role2 attribute.
+    // Gets the current value of the Student attribute.
     public boolean getNewStudent() { return Student; }
+    
+    /*****
+     * <p> Method: boolean getStaffRole() </p>
+     * 
+     * <p> Description: This getter returns the value of the Staff role attribute. </p>
+     * 
+     * @return true if this user plays a Staff role, else false
+	 *
+     */
+    // ⭐ NEW: Gets the current value of the Staff role attribute.
+    public boolean getStaffRole() { return staffRole; }
 
         
     /*****
@@ -277,13 +314,14 @@ public class User {
      * @return a value 0 - 5 of the number of roles this user plays
 	 *
      */
-    // Gets the current value of the Staff role attribute.
+    // Gets the number of roles this user plays.
     public int getNumRoles() {
     	int numRoles = 0;
     	if (adminRole) numRoles++;
     	if (role1) numRoles++;
     	if (role2) numRoles++;
     	if (Student) numRoles++;
+    	if (staffRole) numRoles++;  // ⭐ NEW: Count staff role
     	return numRoles;
     }
 }

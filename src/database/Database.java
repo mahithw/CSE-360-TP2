@@ -1,10 +1,6 @@
 package database;
 
 import java.sql.*;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -59,6 +55,7 @@ public class Database {
 	private boolean currentNewRole1;
 	private boolean currentNewRole2;
 	private boolean currentNewStudent;
+	private boolean currentStaffRole;
 
 	/*******
 	 * <p> Method: Database </p>
@@ -135,6 +132,7 @@ public class Database {
 	    statement.execute("ALTER TABLE userDB ADD COLUMN IF NOT EXISTS otpExpiresAt BIGINT");
 	    statement.execute("ALTER TABLE userDB ADD COLUMN IF NOT EXISTS mustResetOnNextLogin BOOL DEFAULT FALSE");
 	    statement.execute("ALTER TABLE userDB ADD COLUMN IF NOT EXISTS newStudent BOOL DEFAULT FALSE");
+		statement.execute("ALTER TABLE userDB ADD COLUMN IF NOT EXISTS staffRole BOOL DEFAULT FALSE");
 
 	    // ========== ADD THESE NEW TABLES ==========
 	    
@@ -228,8 +226,8 @@ public class Database {
  */
 	public void register(User user) throws SQLException {
 		String insertUser = "INSERT INTO userDB (userName, password, firstName, middleName, "
-				+ "lastName, preferredFirstName, emailAddress, adminRole, newRole1, newRole2, newStudent) "
-				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        + "lastName, preferredFirstName, emailAddress, adminRole, newRole1, newRole2, newStudent, staffRole) "
+        + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		try (PreparedStatement pstmt = connection.prepareStatement(insertUser)) {
 			currentUsername = user.getUserName();
 			pstmt.setString(1, currentUsername);
@@ -263,6 +261,9 @@ public class Database {
 			
 			currentNewStudent = user.getNewStudent();
 			pstmt.setBoolean(11, currentNewStudent);
+
+			boolean currentStaffRole = user.getStaffRole();
+    		pstmt.setBoolean(12, currentStaffRole);
 			
 			pstmt.executeUpdate();
 		}
@@ -394,6 +395,31 @@ public class Database {
 			return rs.next();
 		} catch  (SQLException e) {
 		       e.printStackTrace();
+		}
+		return false;
+	}
+
+	/*******
+	 * <p> Method: boolean loginStaff(User user) </p>
+	 * 
+	 * <p> Description: Check to see that a user with the specified username, password, and role
+	 *      is the same as a row in the table for the username, password, and role. </p>
+	 * 
+	 * @param user specifies the specific user that should be logged in playing the Staff role.
+	 * 
+	 * @return true if the specified user has been logged in as Staff else false.
+	 * 
+	 */
+	public boolean loginStaff(User user) {
+		String query = "SELECT * FROM userDB WHERE userName = ? AND password = ? AND "
+				+ "staffRole = TRUE";
+		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+			pstmt.setString(1, user.getUserName());
+			pstmt.setString(2, user.getPassword());
+			ResultSet rs = pstmt.executeQuery();
+			return rs.next();
+		} catch  (SQLException e) {
+			e.printStackTrace();
 		}
 		return false;
 	}
@@ -1040,13 +1066,15 @@ public class Database {
 	            currentNewRole1 = rs.getBoolean("newRole1");
 	            currentNewRole2 = rs.getBoolean("newRole2");
 	            currentNewStudent = rs.getBoolean("newStudent");
+				currentStaffRole = rs.getBoolean("staffRole");
 
 	            // Optional debug line:
 	            System.out.println("*** Fetching account data for user: " + username);
 	            System.out.println("    Admin: " + currentAdminRole
 	                             + ", Role1: " + currentNewRole1
 	                             + ", Role2: " + currentNewRole2
-	                             + ", Student: " + currentNewStudent);
+	                             + ", Student: " + currentNewStudent
+								 + ", Staff: " + currentStaffRole);
 	            return true;
 	        }
 	    } catch (SQLException e) {
@@ -1134,6 +1162,22 @@ public class Database {
 		    } catch (SQLException e) {
 		        return false;
 		    }
+		}
+
+		if (role.compareTo("Student") == 0) {
+			String query = "UPDATE userDB SET newStudent = ? WHERE username = ?";
+			try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+				pstmt.setString(1, value);
+				pstmt.setString(2, username);
+				pstmt.executeUpdate();
+				if (value.compareTo("true") == 0)
+					currentNewStudent = true;
+				else
+					currentNewStudent = false;
+				return true;
+			} catch (SQLException e) {
+				return false;
+			}
 		}
 		
 		return false;
@@ -1349,6 +1393,18 @@ public class Database {
 	 *  
 	 */
 	public boolean getCurrentNewStudent() { return currentNewStudent;};
+
+	/*******
+	 * <p> Method: boolean getCurrentStaffRole() </p>
+	 * 
+	 * <p> Description: Get the current user's Staff role attribute.</p>
+	 * 
+	 * @return true if this user plays a Staff role, else false
+	 *  
+	 */
+	public boolean getCurrentStaffRole() { 
+		return currentStaffRole;
+	}
 
 	
 	/*******
